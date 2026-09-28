@@ -229,3 +229,16 @@ certs/
 .env
 .env.*
 config.json
+
+# AWS IoT device credentials and certificates
+certs/
+**/certs/
+*.pem
+*.key
+*.crt
+
+# Environment / local configuration secrets
+.env
+.env.*
+!.env.example
+config.json
