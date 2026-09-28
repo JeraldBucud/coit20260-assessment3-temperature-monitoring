@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# AWS IoT certificates and secrets
+certs/
+**/certs/
+*.pem
+*.key
+*.crt
+
+# Environment/config secrets
+.env
+.env.*
+config.json
