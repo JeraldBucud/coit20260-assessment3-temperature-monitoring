@@ -1,0 +1,7 @@
+{
+  "endpoint": "YOUR_AWS_IOT_ENDPOINT",
+  "clientId": "nextgen-temperature-sensor-01",
+  "topic": "nextgen/home/temperature",
+  "deviceId": "sensor-001",
+  "room": "Living Room"
+}
