@@ -61,22 +61,24 @@ The planned AWS services are:
 +-----------------------------+
 |         AWS Lambda          |
 | Validate and process data   |
-+---------+----------+--------+
-          |          |
-          |          |
-          v          v
-+---------------+  +----------------+
-|   DynamoDB    |  |   Amazon SNS   |
-| Store reading |  | Send alert     |
-+---------------+  +----------------+
-          |
-          |
-          v
-+-----------------------------+
-|    Amazon CloudWatch Logs   |
-| System / warning / error    |
-| events from processing      |
-+-----------------------------+
++--------+---------+----------+
+         |         |
+         |         +----------------------+
+         |                                |
+         v                                v
++---------------+                +----------------+
+|   DynamoDB    |                |   Amazon SNS   |
+| Store reading |                | Send alert     |
++---------------+                +----------------+
+         |
+         +------------------------------+
+                                        |
+                                        v
+                              +-----------------------------+
+                              |    Amazon CloudWatch Logs   |
+                              | System / warning / error    |
+                              | events from Lambda          |
+                              +-----------------------------+
 ```
 
 CloudWatch logging is primarily produced by the processing layer so that normal processing, warnings, and failures can be reviewed during testing and demonstration.
@@ -94,12 +96,29 @@ nextgen/home/temperature
 ```
 
 4. AWS IoT Core receives the MQTT message.
-5. An AWS IoT Rule forwards the message to AWS Lambda.
-6. Lambda validates the payload.
+5. AWS IoT Rule `nextgenTemperatureProcessingRule` forwards the message to AWS Lambda.
+6. Lambda function `nextgen-temperature-processor` validates and classifies the payload.
 7. Lambda stores the reading in DynamoDB.
 8. Lambda determines whether the reading is normal or abnormal.
 9. If the reading is abnormal, Lambda triggers an SNS notification.
 10. Processing events, warnings, and errors are recorded in CloudWatch Logs.
+
+## Fixed Integration Names
+
+The following names are fixed for cross-component integration:
+
+| Component | Fixed value |
+| --- | --- |
+| AWS Region | `ap-southeast-2` |
+| IoT Thing | `nextgen-temperature-sensor-01` |
+| IoT Policy | `nextgen-temperature-sensor-policy` |
+| MQTT Topic | `nextgen/home/temperature` |
+| IoT Rule | `nextgenTemperatureProcessingRule` |
+| Lambda Function | `nextgen-temperature-processor` |
+| Lambda Execution Role | `nextgen-temperature-lambda-execution-role` |
+| Lambda Runtime Policy | `nextgen-temperature-lambda-runtime-policy` |
+| DynamoDB Table | `nextgen-temperature-readings` |
+| SNS Topic | `nextgen-temperature-alerts` |
 
 ## MQTT Data Contract
 
@@ -242,18 +261,26 @@ sensor-simulator/README.md
 - `35°C` high reading published successfully
 - `12°C` low reading published successfully
 - AWS IoT certificate files and local configuration excluded from Git
+- team IAM users and role-based access groups configured
+- Lambda execution role `nextgen-temperature-lambda-execution-role` created
+- Lambda runtime policy `nextgen-temperature-lambda-runtime-policy` attached
+- Lambda function `nextgen-temperature-processor` created by Member 2
+- AWS IoT Rule `nextgenTemperatureProcessingRule` created and activated
+- AWS IoT Core permission to invoke `nextgen-temperature-processor` verified
+- end-to-end Sensor → IoT Core → IoT Rule → Lambda integration verified
+- integrated Lambda classifications verified in CloudWatch:
+  - `24°C` → `NORMAL`
+  - `35°C` → `HIGH`
+  - `12°C` → `LOW`
 
 ### In Progress / Remaining
 
-- AWS IoT Rule configuration
-- Lambda processing component
-- DynamoDB storage component
-- SNS alerting component
-- CloudWatch logging and error evidence
-- end-to-end integration
-- final test cases
-- deployment screenshots
-- report content
+- DynamoDB storage component and Lambda → DynamoDB integration
+- SNS alerting component and Lambda → SNS integration
+- full end-to-end Sensor → IoT → Lambda → DynamoDB/SNS validation
+- final invalid-payload integration evidence
+- final deployment screenshots
+- final report content
 - demonstration video
 - live demonstration preparation
 
@@ -339,10 +366,11 @@ The simulator uses a restricted IoT policy instead of unrestricted `iot:*` permi
 
 Development work should be performed on individual or workstream branches before being merged into `main`.
 
-Example Member 1 branch:
+Member 1 branches used so far:
 
 ```text
 jerald/member1-iot-sensor
+jerald/member1-iot-rule
 ```
 
 Changes should be reviewed before merging so that credentials, private configuration, and incomplete work are not accidentally committed.
@@ -457,7 +485,7 @@ Current documentation:
 sensor-simulator/README.md
 ```
 
-Additional component documentation will be added as Lambda, DynamoDB, SNS, and CloudWatch work begins.
+Additional component documentation will be added as Lambda, DynamoDB, SNS, and CloudWatch work is completed and integrated.
 
 ## Project Notes
 
