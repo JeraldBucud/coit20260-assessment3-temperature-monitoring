@@ -43,13 +43,13 @@ Python Temperature Simulator
             | Topic:
             | nextgen/home/temperature
             v
-         IoT Rule
+nextgenTemperatureProcessingRule
             |
             v
-       AWS Lambda
+nextgen-temperature-processor
 ```
 
-The IoT Rule and Lambda integration will be completed when the Lambda processing component is available.
+The IoT Rule and Lambda integration are complete and have been verified using live sensor messages.
 
 The complete group solution is intended to follow this architecture:
 
@@ -435,19 +435,53 @@ The following Member 1 tasks have already been completed:
 - Python simulator connected successfully to AWS IoT Core;
 - normal reading `24°C` published successfully;
 - high reading `35°C` published successfully; and
-- low reading `12°C` published successfully.
+- low reading `12°C` published successfully;
+- IoT Rule `nextgenTemperatureProcessingRule` created and activated;
+- Lambda target `nextgen-temperature-processor` attached to the rule;
+- AWS IoT Core `lambda:InvokeFunction` permission verified;
+- end-to-end sensor-to-Lambda integration verified;
+- CloudWatch confirmed integrated classifications:
+  - `24°C` → `NORMAL`
+  - `35°C` → `HIGH`
+  - `12°C` → `LOW`.
 
 ## Remaining Member 1 Work
 
 The remaining work for Member 1 is:
 
-- create the AWS IoT Rule;
-- connect the IoT Rule to the Member 2 Lambda function;
-- perform an end-to-end sensor-to-Lambda integration test;
+- support full-system integration once DynamoDB and SNS are ready;
 - collect final deployment screenshots;
 - collect final operation screenshots;
-- contribute Member 1 deployment notes to the report; and
+- contribute Member 1 deployment and integration notes to the report; and
 - prepare the Member 1 portion of the demonstration video and live demonstration.
+
+## Verified Sensor-to-Lambda Integration
+
+The following live integration path has been tested successfully:
+
+```text
+Python Sensor Simulator
+        |
+        v
+AWS IoT Core
+        |
+        v
+nextgenTemperatureProcessingRule
+        |
+        v
+nextgen-temperature-processor
+        |
+        v
+CloudWatch Logs
+```
+
+Verified results:
+
+| Sensor input | Lambda classification |
+| ---: | --- |
+| `24°C` | `NORMAL` |
+| `35°C` | `HIGH` |
+| `12°C` | `LOW` |
 
 ## Integration Contract
 
