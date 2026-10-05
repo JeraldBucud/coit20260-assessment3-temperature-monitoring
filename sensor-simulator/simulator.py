@@ -44,6 +44,20 @@ def validate_files():
         )
 
 
+def parse_temperature(value):
+    """
+    Convert numeric temperature input to float.
+
+    If the value is not numeric, keep it as a string so that intentionally
+    invalid test data can still be published to AWS IoT Core and validated
+    by the downstream Lambda function.
+    """
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+
 def create_payload(config, temperature):
     return {
         "deviceId": config["deviceId"],
@@ -60,9 +74,11 @@ def main():
 
     parser.add_argument(
         "--temperature",
-        type=float,
         required=True,
-        help="Temperature reading in degrees Celsius.",
+        help=(
+            "Temperature reading in degrees Celsius. "
+            "Text values may also be supplied for invalid-data testing."
+        ),
     )
 
     args = parser.parse_args()
@@ -71,7 +87,9 @@ def main():
         validate_files()
         config = load_config()
 
-        payload = create_payload(config, args.temperature)
+        temperature = parse_temperature(args.temperature)
+
+        payload = create_payload(config, temperature)
         payload_json = json.dumps(payload)
 
         mqtt_connection = mqtt_connection_builder.mtls_from_path(
